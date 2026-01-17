@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'signup_page.dart';
-import 'home_page.dart';
+import 'main_container.dart'; // <-- ADD THIS
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -14,7 +14,6 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
-  // Validation states
   String? _emailError;
   String? _passwordError;
 
@@ -22,45 +21,31 @@ class _LoginPageState extends State<LoginPage> {
     final email = _email.text.trim();
     final pass = _password.text.trim();
 
-    // Reset errors
     setState(() {
       _emailError = null;
       _passwordError = null;
     });
 
-    // Validate email
     if (email.isEmpty) {
-      setState(() {
-        _emailError = "Required";
-      });
+      setState(() => _emailError = "Required");
     } else if (!_validEmail(email)) {
-      setState(() {
-        _emailError = "Invalid email";
-      });
+      setState(() => _emailError = "Invalid email");
     }
 
-    // Validate password
     if (pass.isEmpty) {
-      setState(() {
-        _passwordError = "Required";
-      });
+      setState(() => _passwordError = "Required");
     } else if (pass.length < 6) {
-      setState(() {
-        _passwordError = "Min 6 characters";
-      });
+      setState(() => _passwordError = "Min 6 characters");
     }
 
-    // Check if any errors exist
-    if (_emailError != null || _passwordError != null) {
-      return;
-    }
+    if (_emailError != null || _passwordError != null) return;
 
-    _showSnack('Login successful!');
+    _showSnack("Login successful!");
 
-    Future.delayed(const Duration(milliseconds: 700), () {
+    Future.delayed(const Duration(milliseconds: 600), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => const MainContainer()), // <--
       );
     });
   }
@@ -69,15 +54,19 @@ class _LoginPageState extends State<LoginPage> {
     return RegExp(r'^[\w\-\.]+@([\w\-]+\.)+[\w\-]{2,4}$').hasMatch(email);
   }
 
+  void _forgotPassword() {
+    _showSnack("Password reset link sent!");
+  }
+
   void _showSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
         backgroundColor: const Color(0xFF00A8C6),
         behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.only(bottom: 30, left: 18, right: 18),
+        margin: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(milliseconds: 1400),
+        duration: const Duration(milliseconds: 1300),
       ),
     );
   }
@@ -87,10 +76,6 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(builder: (_) => const SignupPage()),
     );
-  }
-
-  void _forgotPassword() {
-    _showSnack("Password reset link sent to email");
   }
 
   @override
@@ -109,6 +94,7 @@ class _LoginPageState extends State<LoginPage> {
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 20),
 
@@ -135,8 +121,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
 
-              const SizedBox(height: 4),
-
+              const SizedBox(height: 6),
               const Text(
                 "Apartment Maintenance System",
                 style: TextStyle(fontSize: 14, color: Colors.black54),
@@ -151,7 +136,6 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
-
               const SizedBox(height: 6),
 
               _input(
@@ -159,12 +143,8 @@ class _LoginPageState extends State<LoginPage> {
                 hint: "Enter your email",
                 icon: Icons.email_outlined,
                 errorText: _emailError,
-                onChanged: (value) {
-                  if (_emailError != null) {
-                    setState(() {
-                      _emailError = null;
-                    });
-                  }
+                onChanged: (v) {
+                  if (_emailError != null) setState(() => _emailError = null);
                 },
               ),
 
@@ -177,7 +157,6 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
-
               const SizedBox(height: 6),
 
               _input(
@@ -186,21 +165,17 @@ class _LoginPageState extends State<LoginPage> {
                 icon: Icons.lock_outline,
                 obscure: _obscure,
                 errorText: _passwordError,
-                onChanged: (value) {
-                  if (_passwordError != null) {
-                    setState(() {
-                      _passwordError = null;
-                    });
-                  }
-                },
                 suffix: IconButton(
                   icon: Icon(
-                    _obscure
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined,
+                    _obscure ? Icons.visibility_off : Icons.visibility,
                   ),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
+                onChanged: (v) {
+                  if (_passwordError != null) {
+                    setState(() => _passwordError = null);
+                  }
+                },
               ),
 
               const SizedBox(height: 10),
@@ -212,14 +187,14 @@ class _LoginPageState extends State<LoginPage> {
                   child: const Text(
                     "Forgot Password?",
                     style: TextStyle(
-                      color: Color(0xFF1D3E72),
                       fontWeight: FontWeight.w600,
+                      color: Color(0xFF1D3E72),
                     ),
                   ),
                 ),
               ),
 
-              const SizedBox(height: 22),
+              const SizedBox(height: 24),
 
               GestureDetector(
                 onTap: _login,
@@ -252,7 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   const Text(
                     "Don't have an account?",
-                    style: TextStyle(fontSize: 15, color: Colors.black87),
+                    style: TextStyle(color: Colors.black87),
                   ),
                   const SizedBox(width: 6),
                   GestureDetector(
@@ -260,7 +235,6 @@ class _LoginPageState extends State<LoginPage> {
                     child: const Text(
                       "Sign Up",
                       style: TextStyle(
-                        fontSize: 15,
                         color: Color(0xFF1D3E72),
                         fontWeight: FontWeight.w700,
                       ),
@@ -287,37 +261,22 @@ Widget _input({
   Widget? suffix,
   ValueChanged<String>? onChanged,
 }) {
-  return Container(
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(14),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.06),
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: TextField(
-      controller: controller,
-      obscureText: obscure,
-      onChanged: onChanged,
-      decoration: InputDecoration(
-        hintText: hint,
-        border: InputBorder.none,
-        prefixIcon: Icon(icon, color: Colors.grey),
-        suffixIcon: suffix,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
-        errorText: errorText,
-        errorStyle: const TextStyle(
-          color: Colors.red,
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-        ),
+  return TextField(
+    controller: controller,
+    obscureText: obscure,
+    onChanged: onChanged,
+    decoration: InputDecoration(
+      hintText: hint,
+      prefixIcon: Icon(icon, color: Colors.grey),
+      suffixIcon: suffix,
+      errorText: errorText,
+      errorStyle: const TextStyle(height: 0.9),
+      filled: true,
+      fillColor: Colors.white,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
       ),
     ),
   );
