@@ -16,20 +16,28 @@ class OnboardingPage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(0, 16, 24, 0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: const [
-                  Text(
-                    "Skip",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF00A8C6),
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const LoginPage()),
+                      );
+                    },
+                    child: const Text(
+                      "Skip",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF0A5CFF),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
 
-            // Centered Image Section - SMALLER
+            // Center image section
             Expanded(
               child: Center(
                 child: Padding(
@@ -40,20 +48,18 @@ class OnboardingPage extends StatelessWidget {
                       "assets/images/apartment.png",
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      height:
-                          400, // <-- 450 ගෙන් 350 ක් දක්වා අඩු කළා (100 කින් අඩු)
+                      height: 400,
                     ),
                   ),
                 ),
               ),
             ),
 
-            // Bottom Content Section
+            // Bottom Content
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 children: [
-                  // Title
                   const Text(
                     "Quick & Reliable\nMaintenance",
                     textAlign: TextAlign.center,
@@ -66,7 +72,6 @@ class OnboardingPage extends StatelessWidget {
 
                   const SizedBox(height: 14),
 
-                  // Subtitle
                   const Text(
                     "From leaky faucets to electrical fixes, our team is just a tap away — ensuring your home stays safe and functional.",
                     textAlign: TextAlign.center,
@@ -79,42 +84,55 @@ class OnboardingPage extends StatelessWidget {
 
                   const SizedBox(height: 40),
 
-                  // GET STARTED BUTTON
+                  // Gradient GET STARTED BUTTON
                   SizedBox(
                     width: double.infinity,
                     height: 60,
-                    child: ElevatedButton(
-                      onPressed: () {
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(24),
+                      onTap: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (_) => const LoginPage()),
                         );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00A8C6),
-                        shape: RoundedRectangleBorder(
+                      child: Container(
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(24),
-                        ),
-                        elevation: 5,
-                      ),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Get Started",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0A5CFF).withOpacity(0.25),
+                              blurRadius: 18,
+                              offset: const Offset(0, 6),
                             ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Get Started",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ],
+                        ),
                       ),
                     ),
                   ),
