@@ -14,29 +14,50 @@ class _LoginPageState extends State<LoginPage> {
   final _email = TextEditingController();
   final _password = TextEditingController();
 
+  // Validation states
+  String? _emailError;
+  String? _passwordError;
+
   void _login() {
     final email = _email.text.trim();
     final pass = _password.text.trim();
 
-    if (email.isEmpty || pass.isEmpty) {
-      _showSnack('Please fill all fields');
-      return;
+    // Reset errors
+    setState(() {
+      _emailError = null;
+      _passwordError = null;
+    });
+
+    // Validate email
+    if (email.isEmpty) {
+      setState(() {
+        _emailError = "Required";
+      });
+    } else if (!_validEmail(email)) {
+      setState(() {
+        _emailError = "Invalid email";
+      });
     }
 
-    if (!_validEmail(email)) {
-      _showSnack('Enter a valid email');
-      return;
+    // Validate password
+    if (pass.isEmpty) {
+      setState(() {
+        _passwordError = "Required";
+      });
+    } else if (pass.length < 6) {
+      setState(() {
+        _passwordError = "Min 6 characters";
+      });
     }
 
-    if (pass.length < 6) {
-      _showSnack('Password must be at least 6 characters');
+    // Check if any errors exist
+    if (_emailError != null || _passwordError != null) {
       return;
     }
 
     _showSnack('Login successful!');
 
-    // Navigate to Home Page
-    Future.delayed(const Duration(milliseconds: 500), () {
+    Future.delayed(const Duration(milliseconds: 700), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
@@ -54,56 +75,9 @@ class _LoginPageState extends State<LoginPage> {
         content: Text(msg),
         backgroundColor: const Color(0xFF00A8C6),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
-
-  void _forgotPassword() {
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Forgot Password'),
-        content: const Text(
-          'Enter your email and we will send a password reset link.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'Cancel',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          InkWell(
-            borderRadius: BorderRadius.circular(8),
-            onTap: () {
-              Navigator.pop(context);
-              _showSnack('Reset link sent');
-            },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 10),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                ),
-              ),
-              child: const Text(
-                'Send',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ],
+        margin: const EdgeInsets.only(bottom: 30, left: 18, right: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 1400),
       ),
     );
   }
@@ -113,6 +87,10 @@ class _LoginPageState extends State<LoginPage> {
       context,
       MaterialPageRoute(builder: (_) => const SignupPage()),
     );
+  }
+
+  void _forgotPassword() {
+    _showSnack("Password reset link sent to email");
   }
 
   @override
@@ -132,6 +110,8 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const SizedBox(height: 20),
+
               SizedBox(
                 width: 150,
                 height: 150,
@@ -154,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                   color: Color(0xFF1D3E72),
                 ),
               ),
+
               const SizedBox(height: 4),
 
               const Text(
@@ -170,12 +151,21 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
+
               const SizedBox(height: 6),
 
-              _inputField(
+              _input(
                 controller: _email,
                 hint: "Enter your email",
                 icon: Icons.email_outlined,
+                errorText: _emailError,
+                onChanged: (value) {
+                  if (_emailError != null) {
+                    setState(() {
+                      _emailError = null;
+                    });
+                  }
+                },
               ),
 
               const SizedBox(height: 14),
@@ -187,13 +177,22 @@ class _LoginPageState extends State<LoginPage> {
                   style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                 ),
               ),
+
               const SizedBox(height: 6),
 
-              _inputField(
+              _input(
                 controller: _password,
                 hint: "Enter your password",
                 icon: Icons.lock_outline,
                 obscure: _obscure,
+                errorText: _passwordError,
+                onChanged: (value) {
+                  if (_passwordError != null) {
+                    setState(() {
+                      _passwordError = null;
+                    });
+                  }
+                },
                 suffix: IconButton(
                   icon: Icon(
                     _obscure
@@ -252,9 +251,10 @@ class _LoginPageState extends State<LoginPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    "Don't have an account? ",
+                    "Don't have an account?",
                     style: TextStyle(fontSize: 15, color: Colors.black87),
                   ),
+                  const SizedBox(width: 6),
                   GestureDetector(
                     onTap: _gotoSignup,
                     child: const Text(
@@ -269,7 +269,7 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
 
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -278,12 +278,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-Widget _inputField({
+Widget _input({
   required TextEditingController controller,
   required String hint,
   required IconData icon,
   bool obscure = false,
+  String? errorText,
   Widget? suffix,
+  ValueChanged<String>? onChanged,
 }) {
   return Container(
     decoration: BoxDecoration(
@@ -300,14 +302,21 @@ Widget _inputField({
     child: TextField(
       controller: controller,
       obscureText: obscure,
+      onChanged: onChanged,
       decoration: InputDecoration(
-        border: InputBorder.none,
         hintText: hint,
+        border: InputBorder.none,
         prefixIcon: Icon(icon, color: Colors.grey),
         suffixIcon: suffix,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
+        ),
+        errorText: errorText,
+        errorStyle: const TextStyle(
+          color: Colors.red,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
       ),
     ),
