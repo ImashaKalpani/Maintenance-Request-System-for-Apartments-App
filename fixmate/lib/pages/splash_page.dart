@@ -90,9 +90,9 @@ class _SplashPageState extends State<SplashPage>
                 const SizedBox(height: 35),
 
                 const Text(
-                  "FixMate",
+                  "Apartment FixMate",
                   style: TextStyle(
-                    fontSize: 38,
+                    fontSize: 34,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF1D3E72),
                   ),
