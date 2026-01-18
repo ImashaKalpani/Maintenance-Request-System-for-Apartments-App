@@ -24,4 +24,11 @@ class FirestoreService {
     final doc = await _db.collection('users').doc(uid).get();
     return doc.data();
   }
+
+  // ========== NEW METHOD ==========
+
+  /// Delete user data from Firestore
+  Future<void> deleteUser(String uid) async {
+    await _db.collection('users').doc(uid).delete();
+  }
 }
