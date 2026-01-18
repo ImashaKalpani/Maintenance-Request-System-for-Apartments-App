@@ -85,23 +85,27 @@ class _MainContainerState extends State<MainContainer> {
     required String label,
     required int index,
   }) {
-    final bool active = index == _index;
+    final bool isActive = index == _index;
     final Color activeColor = const Color(0xFF00A8C6);
     final Color inactiveColor = Colors.black45;
 
     return BottomNavigationBarItem(
       label: label,
       icon: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
-        child: Icon(icon, size: 22, color: inactiveColor),
-      ),
-      activeIcon: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-        decoration: BoxDecoration(
-          color: activeColor.withOpacity(0.12),
-          borderRadius: BorderRadius.circular(18),
+        padding: isActive
+            ? const EdgeInsets.symmetric(horizontal: 14, vertical: 6)
+            : const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+        decoration: isActive
+            ? BoxDecoration(
+                color: activeColor.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(18),
+              )
+            : null,
+        child: Icon(
+          icon,
+          size: isActive ? 26 : 22,
+          color: isActive ? activeColor : inactiveColor,
         ),
-        child: Icon(icon, size: 26, color: activeColor),
       ),
     );
   }
