@@ -3,7 +3,6 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import 'login_page.dart';
 import 'edit_profile_page.dart';
-import 'home_page.dart'; // Home page import කරන්න
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -233,35 +232,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     SliverAppBar(
                       backgroundColor: const Color(0xFFF8FAFC),
                       elevation: 0,
-                      leading: IconButton(
-                        onPressed: () {
-                          // Home page ට යන back button
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HomePage()),
-                            (route) => false,
-                          );
-                        },
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.arrow_back_ios_new_rounded,
-                            size: 20,
-                            color: Color(0xFF1D3E72),
-                          ),
-                        ),
-                      ),
+                      leading: Container(), // Back arrow removed
                       title: const Text(
                         "My Profile",
                         style: TextStyle(
