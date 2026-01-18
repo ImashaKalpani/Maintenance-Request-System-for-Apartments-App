@@ -18,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
 
   String? _emailError;
   String? _passwordError;
+  bool _isLoading = false;
 
   final _auth = AuthService();
   final _firestore = FirestoreService();
@@ -45,6 +46,8 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_emailError != null || _passwordError != null) return;
 
+    setState(() => _isLoading = true);
+
     try {
       final user = await _auth.signIn(email, pass);
 
@@ -52,7 +55,7 @@ class _LoginPageState extends State<LoginPage> {
         final data = await _firestore.getUser(user.uid);
         debugPrint("USER DATA: $data");
 
-        _showSnack("Login successful!");
+        _showSuccessSnack("Login successful!");
 
         Future.delayed(const Duration(milliseconds: 600), () {
           Navigator.pushReplacement(
@@ -61,10 +64,32 @@ class _LoginPageState extends State<LoginPage> {
           );
         });
       } else {
-        _showSnack("Login failed: Invalid credentials");
+        _showErrorSnack(
+          "Invalid email or password. Please check your credentials.",
+        );
       }
     } catch (e) {
-      _showSnack("Login failed: ${e.toString()}");
+      String errorMessage = "Login failed";
+
+      if (e.toString().contains("invalid-credential")) {
+        errorMessage =
+            "Invalid email or password. Please check your credentials.";
+      } else if (e.toString().contains("user-not-found")) {
+        errorMessage =
+            "No account found with this email. Please sign up first.";
+      } else if (e.toString().contains("wrong-password")) {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (e.toString().contains("network-request-failed")) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else {
+        errorMessage = "Login failed: ${e.toString()}";
+      }
+
+      _showErrorSnack(errorMessage);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -73,10 +98,89 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _forgotPassword() {
-    _showSnack("Password reset link sent!");
+    final email = _email.text.trim();
+
+    if (email.isEmpty || !_validEmail(email)) {
+      _showForgotPasswordErrorSnack();
+      return;
+    }
+
+    _showInfoSnack("Password reset link sent to $email");
+    // TODO: Implement actual password reset functionality
+    // await _auth.resetPassword(email);
   }
 
-  void _showSnack(String msg) {
+  void _showForgotPasswordErrorSnack() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                "Please enter a valid email address to reset password",
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 4000),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {
+            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showSuccessSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 2000),
+      ),
+    );
+  }
+
+  void _showErrorSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(msg)),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 4000),
+        action: SnackBarAction(
+          label: 'Sign Up',
+          textColor: Colors.white,
+          onPressed: () {
+            _gotoSignup();
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showInfoSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
@@ -84,7 +188,7 @@ class _LoginPageState extends State<LoginPage> {
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.only(bottom: 30, left: 20, right: 20),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        duration: const Duration(milliseconds: 1300),
+        duration: const Duration(milliseconds: 2000),
       ),
     );
   }
@@ -186,6 +290,7 @@ class _LoginPageState extends State<LoginPage> {
                 suffix: IconButton(
                   icon: Icon(
                     _obscure ? Icons.visibility_off : Icons.visibility,
+                    color: Colors.grey,
                   ),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
@@ -215,30 +320,71 @@ class _LoginPageState extends State<LoginPage> {
               const SizedBox(height: 24),
 
               GestureDetector(
-                onTap: _login,
+                onTap: _isLoading ? null : _login,
                 child: Container(
                   height: 52,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(18),
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
-                    ),
+                    gradient: _isLoading
+                        ? const LinearGradient(
+                            colors: [Colors.grey, Colors.grey],
+                          )
+                        : const LinearGradient(
+                            colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
+                          ),
                   ),
-                  child: const Center(
-                    child: Text(
-                      "Login",
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                      ),
-                    ),
+                  child: Center(
+                    child: _isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            "Login",
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
 
               const SizedBox(height: 28),
+
+              // Helper message for new users
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.blue[100]!),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        "New to Apartment FixMate? Create an account to get started.",
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.blue[800],
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 16),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -255,6 +401,7 @@ class _LoginPageState extends State<LoginPage> {
                       style: TextStyle(
                         color: Color(0xFF1D3E72),
                         fontWeight: FontWeight.w700,
+                        fontSize: 15,
                       ),
                     ),
                   ),
@@ -295,6 +442,14 @@ Widget _input({
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Color(0xFF00A8C6), width: 2),
       ),
     ),
   );

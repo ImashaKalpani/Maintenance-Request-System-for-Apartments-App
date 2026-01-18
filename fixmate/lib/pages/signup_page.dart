@@ -14,6 +14,7 @@ class _SignupPageState extends State<SignupPage> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _agreeToTerms = false;
+  bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -31,14 +32,16 @@ class _SignupPageState extends State<SignupPage> {
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreeToTerms) {
-      _showSnack("Please agree to terms & conditions");
+      _showErrorSnack("Please agree to terms & conditions");
       return;
     }
 
     if (_password.text != _confirm.text) {
-      _showSnack("Passwords do not match");
+      _showErrorSnack("Passwords do not match");
       return;
     }
+
+    setState(() => _isLoading = true);
 
     try {
       final user = await _auth.signUp(
@@ -55,7 +58,7 @@ class _SignupPageState extends State<SignupPage> {
           apartment: _apartment.text.trim(),
         );
 
-        _showSnack("Account created successfully!");
+        _showSuccessSnack("Account created successfully!");
 
         Future.delayed(const Duration(milliseconds: 800), () {
           Navigator.pushReplacement(
@@ -65,18 +68,67 @@ class _SignupPageState extends State<SignupPage> {
         });
       }
     } catch (e) {
-      _showSnack("Failed: $e");
+      String errorMessage = "Sign up failed";
+
+      if (e.toString().contains("email-already-in-use")) {
+        errorMessage =
+            "This email is already registered. Please try to login instead.";
+      } else if (e.toString().contains("weak-password")) {
+        errorMessage = "Password is too weak. Please use a stronger password.";
+      } else if (e.toString().contains("network-request-failed")) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else {
+        errorMessage = "Failed: ${e.toString()}";
+      }
+
+      _showErrorSnack(errorMessage);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
-  void _showSnack(String msg) {
+  void _showSuccessSnack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),
-        backgroundColor: const Color(0xFF00A8C6),
+        backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.only(bottom: 30, left: 18, right: 18),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 2000),
+      ),
+    );
+  }
+
+  void _showErrorSnack(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.white, size: 20),
+            const SizedBox(width: 8),
+            Expanded(child: Text(msg)),
+          ],
+        ),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.only(bottom: 30, left: 18, right: 18),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        duration: const Duration(milliseconds: 4000),
+        action: msg.contains("already registered")
+            ? SnackBarAction(
+                label: 'Login',
+                textColor: Colors.white,
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => const LoginPage()),
+                  );
+                },
+              )
+            : null,
       ),
     );
   }
@@ -207,25 +259,38 @@ class _SignupPageState extends State<SignupPage> {
                   const SizedBox(height: 28),
 
                   GestureDetector(
-                    onTap: _signup,
+                    onTap: _isLoading ? null : _signup,
                     child: Container(
                       height: 54,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(18),
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
-                        ),
+                        gradient: _isLoading
+                            ? const LinearGradient(
+                                colors: [Colors.grey, Colors.grey],
+                              )
+                            : const LinearGradient(
+                                colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
+                              ),
                       ),
-                      child: const Center(
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+                      child: Center(
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Text(
+                                "Sign Up",
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ),
@@ -282,7 +347,7 @@ Widget _input(
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.06),
@@ -298,7 +363,18 @@ Widget _input(
       decoration: InputDecoration(
         hintText: label,
         prefixIcon: Icon(icon, color: Colors.grey),
-        border: InputBorder.none,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF00A8C6), width: 2),
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
@@ -318,7 +394,7 @@ Widget _passwordInput({
   return Container(
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(14),
       boxShadow: [
         BoxShadow(
           color: Colors.black.withOpacity(0.06),
@@ -341,7 +417,18 @@ Widget _passwordInput({
           ),
           onPressed: toggle,
         ),
-        border: InputBorder.none,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey[300]!, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF00A8C6), width: 2),
+        ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 14,
