@@ -17,7 +17,7 @@ class _MainContainerState extends State<MainContainer> {
   final List<Widget> _pages = const [
     HomePage(),
     RequestsPage(),
-    CallPage(),
+    EmergencySupportPage(),
     ProfilePage(),
   ];
 

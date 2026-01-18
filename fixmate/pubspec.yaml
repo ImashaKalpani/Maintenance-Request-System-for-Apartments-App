@@ -15,7 +15,8 @@ dependencies:
   firebase_auth: ^6.1.3
   firebase_database: ^12.1.1
   cloud_firestore: ^6.1.1
-  
+  url_launcher: ^6.3.0   # ← added only this, no other changes
+
   # අවශ්‍යතා අනුව අනෙකුත් Firebase packages:
   # firebase_auth: ^5.2.0
   # cloud_firestore: ^4.18.0
