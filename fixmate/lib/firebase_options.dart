@@ -17,17 +17,29 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
-        return windows;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for windows - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -40,47 +52,11 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCfCc9yatt3lmVyErZHdN8ukAl8mctmVY8',
-    appId: '1:616196317928:web:f4233256bac47c63acdf5d',
-    messagingSenderId: '616196317928',
-    projectId: 'apart-fixmate-app',
-    authDomain: 'apart-fixmate-app.firebaseapp.com',
-    storageBucket: 'apart-fixmate-app.firebasestorage.app',
-  );
-
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDBKUu1dOuXFe3rAUYn--MCwHdiM2rd14Q',
     appId: '1:616196317928:android:b1a3f3acf461cf7facdf5d',
     messagingSenderId: '616196317928',
     projectId: 'apart-fixmate-app',
-    storageBucket: 'apart-fixmate-app.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDI9MAG6jrWmwnKq55HJqBaPGesmXeIYK0',
-    appId: '1:616196317928:ios:cc92dd2f751c2fcfacdf5d',
-    messagingSenderId: '616196317928',
-    projectId: 'apart-fixmate-app',
-    storageBucket: 'apart-fixmate-app.firebasestorage.app',
-    iosBundleId: 'com.example.fixmate',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDI9MAG6jrWmwnKq55HJqBaPGesmXeIYK0',
-    appId: '1:616196317928:ios:cc92dd2f751c2fcfacdf5d',
-    messagingSenderId: '616196317928',
-    projectId: 'apart-fixmate-app',
-    storageBucket: 'apart-fixmate-app.firebasestorage.app',
-    iosBundleId: 'com.example.fixmate',
-  );
-
-  static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCfCc9yatt3lmVyErZHdN8ukAl8mctmVY8',
-    appId: '1:616196317928:web:ba3e34493b5edae3acdf5d',
-    messagingSenderId: '616196317928',
-    projectId: 'apart-fixmate-app',
-    authDomain: 'apart-fixmate-app.firebaseapp.com',
     storageBucket: 'apart-fixmate-app.firebasestorage.app',
   );
 }
