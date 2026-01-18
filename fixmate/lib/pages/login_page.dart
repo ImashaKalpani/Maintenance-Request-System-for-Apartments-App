@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
+import 'main_container.dart';
 import 'signup_page.dart';
-import 'main_container.dart'; // <-- ADD THIS
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -17,7 +19,10 @@ class _LoginPageState extends State<LoginPage> {
   String? _emailError;
   String? _passwordError;
 
-  void _login() {
+  final _auth = AuthService();
+  final _firestore = FirestoreService();
+
+  Future<void> _login() async {
     final email = _email.text.trim();
     final pass = _password.text.trim();
 
@@ -40,14 +45,27 @@ class _LoginPageState extends State<LoginPage> {
 
     if (_emailError != null || _passwordError != null) return;
 
-    _showSnack("Login successful!");
+    try {
+      final user = await _auth.signIn(email, pass);
 
-    Future.delayed(const Duration(milliseconds: 600), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MainContainer()), // <--
-      );
-    });
+      if (user != null) {
+        final data = await _firestore.getUser(user.uid);
+        debugPrint("USER DATA: $data");
+
+        _showSnack("Login successful!");
+
+        Future.delayed(const Duration(milliseconds: 600), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MainContainer()),
+          );
+        });
+      } else {
+        _showSnack("Login failed: Invalid credentials");
+      }
+    } catch (e) {
+      _showSnack("Login failed: ${e.toString()}");
+    }
   }
 
   bool _validEmail(String email) {

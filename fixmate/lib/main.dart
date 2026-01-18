@@ -5,8 +5,6 @@ import 'pages/splash_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Firebase initialize කිරීම
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(const MyApp());

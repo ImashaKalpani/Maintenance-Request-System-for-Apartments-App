@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
 import 'login_page.dart';
 
 class SignupPage extends StatefulWidget {
@@ -22,7 +24,10 @@ class _SignupPageState extends State<SignupPage> {
   final _password = TextEditingController();
   final _confirm = TextEditingController();
 
-  void _signup() {
+  final _auth = AuthService();
+  final _firestore = FirestoreService();
+
+  Future<void> _signup() async {
     if (!_formKey.currentState!.validate()) return;
 
     if (!_agreeToTerms) {
@@ -35,14 +40,33 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    _showSnack("Account created successfully!");
-
-    Future.delayed(const Duration(milliseconds: 800), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginPage()),
+    try {
+      final user = await _auth.signUp(
+        _email.text.trim(),
+        _password.text.trim(),
       );
-    });
+
+      if (user != null) {
+        await _firestore.saveUser(
+          uid: user.uid,
+          name: _name.text.trim(),
+          email: _email.text.trim(),
+          phone: _phone.text.trim(),
+          apartment: _apartment.text.trim(),
+        );
+
+        _showSnack("Account created successfully!");
+
+        Future.delayed(const Duration(milliseconds: 800), () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const LoginPage()),
+          );
+        });
+      }
+    } catch (e) {
+      _showSnack("Failed: $e");
+    }
   }
 
   void _showSnack(String msg) {

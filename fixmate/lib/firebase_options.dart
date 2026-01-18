@@ -59,4 +59,5 @@ class DefaultFirebaseOptions {
     projectId: 'apart-fixmate-app',
     storageBucket: 'apart-fixmate-app.firebasestorage.app',
   );
+
 }
