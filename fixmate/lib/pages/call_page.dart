@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'notification_page.dart';
 
 class EmergencySupportPage extends StatelessWidget {
   const EmergencySupportPage({super.key});

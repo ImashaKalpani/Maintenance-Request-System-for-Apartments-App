@@ -27,7 +27,7 @@ class OnboardingPage extends StatelessWidget {
                     child: const Text(
                       "Skip",
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF0A5CFF),
                       ),
@@ -37,25 +37,25 @@ class OnboardingPage extends StatelessWidget {
               ),
             ),
 
-            // Center image section
+            // Center image
             Expanded(
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 5),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
+                    borderRadius: BorderRadius.circular(24),
                     child: Image.asset(
                       "assets/images/apartment.png",
                       fit: BoxFit.cover,
                       width: double.infinity,
-                      height: 400,
+                      height: 400, // ↓ Podda kala
                     ),
                   ),
                 ),
               ),
             ),
 
-            // Bottom Content
+            // Bottom content
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
@@ -64,32 +64,32 @@ class OnboardingPage extends StatelessWidget {
                     "Quick & Reliable\nMaintenance",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 26, // ↓ Podda kala (32 → 26)
                       fontWeight: FontWeight.w800,
                       color: Color(0xFF0D2A47),
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
                   const Text(
                     "From leaky faucets to electrical fixes, our team is just a tap away — ensuring your home stays safe and functional.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 16, // ↓ Podda kala (18 → 16)
                       height: 1.45,
                       color: Colors.black54,
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
 
-                  // Gradient GET STARTED BUTTON
+                  // Get Started Button (Smaller)
                   SizedBox(
                     width: double.infinity,
-                    height: 60,
+                    height: 52, // ↓ Podda kala (60 → 52)
                     child: InkWell(
-                      borderRadius: BorderRadius.circular(24),
+                      borderRadius: BorderRadius.circular(20),
                       onTap: () {
                         Navigator.pushReplacement(
                           context,
@@ -98,7 +98,7 @@ class OnboardingPage extends StatelessWidget {
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(20),
                           gradient: const LinearGradient(
                             colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
                             begin: Alignment.centerLeft,
@@ -107,8 +107,8 @@ class OnboardingPage extends StatelessWidget {
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF0A5CFF).withOpacity(0.25),
-                              blurRadius: 18,
-                              offset: const Offset(0, 6),
+                              blurRadius: 14,
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -120,15 +120,15 @@ class OnboardingPage extends StatelessWidget {
                                 "Get Started",
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: 16, // ↓ Podda kala
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              SizedBox(width: 8),
+                              SizedBox(width: 6),
                               Icon(
                                 Icons.arrow_forward_rounded,
                                 color: Colors.white,
-                                size: 24,
+                                size: 22, // ↓ Podda kala
                               ),
                             ],
                           ),
@@ -137,7 +137,7 @@ class OnboardingPage extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),

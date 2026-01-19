@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'notification_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -27,7 +28,14 @@ class HomePage extends StatelessWidget {
                   ),
                   const Spacer(),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationPage(),
+                        ),
+                      );
+                    },
                     icon: Stack(
                       children: [
                         const Icon(Icons.notifications_none_rounded, size: 28),
@@ -64,7 +72,7 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 22),
 
-              // CREATE REQUEST BUTTON (UPDATED GRADIENT)
+              // CREATE REQUEST BUTTON
               SizedBox(
                 width: double.infinity,
                 child: Container(
@@ -92,8 +100,8 @@ class HomePage extends StatelessWidget {
                     ),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
-                      shadowColor: Colors.transparent,
                       backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
@@ -105,7 +113,6 @@ class HomePage extends StatelessWidget {
 
               const SizedBox(height: 28),
 
-              // RECENT REQUESTS HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: const [
@@ -168,7 +175,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// REQUEST CARD COMPONENT
 Widget _requestCard({
   required String title,
   required String date,
