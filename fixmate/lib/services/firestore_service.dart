@@ -95,6 +95,13 @@ class FirestoreService {
     await _db.collection('requests').doc(requestId).delete();
   }
 
+  // Admin: Get all requests
+  Stream<QuerySnapshot> getAllRequestsStream() {
+    return _db.collection('requests').snapshots();
+    // In a real app, you might want to order by date, but make sure index exists
+    // .orderBy('createdAt', descending: true).snapshots();
+  }
+
   Future<void> updateRequest(
     String requestId,
     Map<String, dynamic> updateData,

@@ -3,6 +3,7 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import 'main_container.dart';
 import 'signup_page.dart';
+import 'admin_dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -58,10 +59,17 @@ class _LoginPageState extends State<LoginPage> {
         _showSuccessSnack("Login successful!");
 
         Future.delayed(const Duration(milliseconds: 600), () {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainContainer()),
-          );
+          if (data != null && data['role'] == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const AdminDashboardPage()),
+            );
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const MainContainer()),
+            );
+          }
         });
       } else {
         _showErrorSnack(
