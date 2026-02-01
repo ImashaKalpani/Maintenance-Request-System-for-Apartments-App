@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../services/firestore_service.dart';
+import 'create_request_page.dart';
+import 'main_container.dart';
 
 class RequestDetailsPage extends StatelessWidget {
   final Map<String, dynamic> requestData;
@@ -90,9 +93,55 @@ class RequestDetailsPage extends StatelessWidget {
         backgroundColor: const Color(0xFFF8FAFC),
         elevation: 0,
         leading: IconButton(
-          onPressed: () => Navigator.pop(context),
-          icon: const Icon(Icons.close_rounded, color: Color(0xFF1D3E72)),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const MainContainer()),
+                (route) => false,
+              );
+            }
+          },
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF1D3E72),
+            ),
+          ),
         ),
+        actions: [
+          IconButton(
+            onPressed: () => _showDeleteConfirmation(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.delete_outline_rounded,
+                color: Colors.red,
+                size: 22,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
@@ -214,9 +263,10 @@ class RequestDetailsPage extends StatelessWidget {
                   const Text(
                     "Description",
                     style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
                       color: Color(0xFF1D3E72),
+                      letterSpacing: -0.3,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -236,9 +286,10 @@ class RequestDetailsPage extends StatelessWidget {
                     const Text(
                       "Attached Image",
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
                         color: Color(0xFF1D3E72),
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -292,25 +343,75 @@ class RequestDetailsPage extends StatelessWidget {
 
             const SizedBox(height: 48),
 
-            // Bottom Action
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1D3E72),
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
+            // Bottom Actions
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _navigateToEdit(context),
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        color: Colors.white,
+                        border: Border.all(
+                          color: const Color(0xFF1D3E72).withOpacity(0.1),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Edit",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1D3E72),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-                child: const Text(
-                  "Done",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(18),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF00A8C6), Color(0xFF0A5CFF)],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF00A8C6).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: const Center(
+                        child: Text(
+                          "Done",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
             const SizedBox(height: 40),
           ],
@@ -365,26 +466,24 @@ class RequestDetailsPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: const Color(0xFF1D3E72).withOpacity(0.5),
-            ),
-            const SizedBox(width: 8),
-            Text(
-              title.toUpperCase(),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-                color: const Color(0xFF1D3E72).withOpacity(0.5),
-                letterSpacing: 1,
+        Padding(
+          padding: const EdgeInsets.only(bottom: 10, left: 4),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: const Color(0xFF1D3E72)),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1D3E72),
+                  letterSpacing: -0.3,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        const SizedBox(height: 12),
         Container(
           width: double.infinity,
           padding: const EdgeInsets.all(20),
@@ -447,5 +546,49 @@ class RequestDetailsPage extends StatelessWidget {
       default:
         return Icons.info_outline;
     }
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Request"),
+        content: const Text(
+          "Are you sure you want to delete this maintenance request? This action cannot be undone.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context); // Close dialog
+              await FirestoreService().deleteRequest(requestId);
+              if (context.mounted) {
+                Navigator.pop(context); // Go back to list
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Request deleted successfully"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToEdit(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            CreateRequestPage(requestId: requestId, initialData: requestData),
+      ),
+    );
   }
 }

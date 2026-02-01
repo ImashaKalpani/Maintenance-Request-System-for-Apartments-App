@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'notification_page.dart';
 import 'request_page.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -145,7 +146,17 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               _buildNotificationIcon(),
                               const SizedBox(width: 12),
-                              _buildHeaderAvatar(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ProfilePage(),
+                                    ),
+                                  );
+                                },
+                                child: _buildHeaderAvatar(),
+                              ),
                             ],
                           ),
                         ],

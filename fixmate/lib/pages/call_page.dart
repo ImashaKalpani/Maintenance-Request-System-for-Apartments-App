@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'main_container.dart';
 
 class EmergencySupportPage extends StatelessWidget {
   const EmergencySupportPage({super.key});
@@ -104,15 +105,56 @@ class EmergencySupportPage extends StatelessWidget {
           children: [
             // ---------- Sticky Header ----------
             Container(
-              padding: const EdgeInsets.symmetric(vertical: 20),
-              alignment: Alignment.center,
-              child: const Text(
-                "Emergency Support",
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1D3E72),
-                ),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () {
+                        if (Navigator.canPop(context)) {
+                          Navigator.pop(context);
+                        } else {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const MainContainer(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                      icon: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          size: 20,
+                          color: Color(0xFF1D3E72),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Text(
+                    "Emergency Support",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1D3E72),
+                    ),
+                  ),
+                ],
               ),
             ),
 

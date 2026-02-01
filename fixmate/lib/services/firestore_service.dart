@@ -82,4 +82,15 @@ class FirestoreService {
         // .orderBy('createdAt', descending: true) // Temporarily removed to fix index issue
         .snapshots();
   }
+
+  Future<void> deleteRequest(String requestId) async {
+    await _db.collection('requests').doc(requestId).delete();
+  }
+
+  Future<void> updateRequest(
+    String requestId,
+    Map<String, dynamic> updateData,
+  ) async {
+    await _db.collection('requests').doc(requestId).update(updateData);
+  }
 }

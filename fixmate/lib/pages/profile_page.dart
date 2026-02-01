@@ -3,6 +3,7 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 import 'login_page.dart';
 import 'edit_profile_page.dart';
+import 'main_container.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -232,7 +233,42 @@ class _ProfilePageState extends State<ProfilePage> {
                     SliverAppBar(
                       backgroundColor: const Color(0xFFF8FAFC),
                       elevation: 0,
-                      leading: Container(), // Back arrow removed
+                      leading: IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          } else {
+                            // If not pushable (e.g., from bottom nav), go to home tab
+                            // This depends on MainContainer implementation, but a safe way is pushing MainContainer
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MainContainer(),
+                              ),
+                              (route) => false,
+                            );
+                          }
+                        },
+                        icon: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.05),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back_ios_new_rounded,
+                            size: 20,
+                            color: Color(0xFF1D3E72),
+                          ),
+                        ),
+                      ),
                       title: const Text(
                         "My Profile",
                         style: TextStyle(

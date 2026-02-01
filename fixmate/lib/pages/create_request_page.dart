@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -6,7 +7,10 @@ import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 
 class CreateRequestPage extends StatefulWidget {
-  const CreateRequestPage({super.key});
+  final String? requestId;
+  final Map<String, dynamic>? initialData;
+
+  const CreateRequestPage({super.key, this.requestId, this.initialData});
 
   @override
   State<CreateRequestPage> createState() => _CreateRequestPageState();
@@ -40,7 +44,24 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   @override
   void initState() {
     super.initState();
-    _loadUserApartment();
+    if (widget.requestId != null && widget.initialData != null) {
+      _loadInitialData();
+    } else {
+      _loadUserApartment();
+    }
+  }
+
+  void _loadInitialData() {
+    final data = widget.initialData!;
+    _titleController.text = data['title'] ?? '';
+    _descriptionController.text = data['description'] ?? '';
+    _apartmentController.text = data['apartment'] ?? '';
+    _phoneController.text = data['phone'] ?? '';
+    _selectedCategory = data['category'] ?? 'Plumbing';
+
+    // Parse date and time if available
+    // For now we'll just leave them for the user to re-select if needed,
+    // or we could parse them properly. Let's keep it simple for now.
   }
 
   Future<void> _loadUserApartment() async {
@@ -147,17 +168,37 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
             imageUrl = await _firestoreService.uploadRequestImage(_imageFile!);
           }
 
-          await _firestoreService.createRequest(
-            uid: uid,
-            title: _titleController.text.trim(),
-            description: _descriptionController.text.trim(),
-            category: _selectedCategory,
-            availableDate: DateFormat('MMM dd, yyyy').format(_selectedDate!),
-            availableTime: _selectedTime!.format(context),
-            apartment: _apartmentController.text.trim(),
-            phone: _phoneController.text.trim(),
-            imageUrl: imageUrl,
-          );
+          if (widget.requestId != null) {
+            // Update existing request
+            await _firestoreService.updateRequest(widget.requestId!, {
+              'title': _titleController.text.trim(),
+              'description': _descriptionController.text.trim(),
+              'category': _selectedCategory,
+              'availableDate': DateFormat(
+                'MMM dd, yyyy',
+              ).format(_selectedDate!),
+              'availableTime': _selectedTime!.format(context),
+              'apartment': _apartmentController.text.trim(),
+              'phone': _phoneController.text.trim(),
+              if (imageUrl != null) 'imageUrl': imageUrl,
+              'status':
+                  'PENDING', // Reset status or keep? Let's reset for review.
+              'updatedAt': FieldValue.serverTimestamp(),
+            });
+          } else {
+            // Create new request
+            await _firestoreService.createRequest(
+              uid: uid,
+              title: _titleController.text.trim(),
+              description: _descriptionController.text.trim(),
+              category: _selectedCategory,
+              availableDate: DateFormat('MMM dd, yyyy').format(_selectedDate!),
+              availableTime: _selectedTime!.format(context),
+              apartment: _apartmentController.text.trim(),
+              phone: _phoneController.text.trim(),
+              imageUrl: imageUrl,
+            );
+          }
           if (mounted) {
             Navigator.pop(context); // Go back to Home Page
             ScaffoldMessenger.of(context).showSnackBar(
@@ -602,9 +643,11 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                     strokeWidth: 2,
                   ),
                 )
-              : const Text(
-                  "Submit Request",
-                  style: TextStyle(
+              : Text(
+                  widget.requestId != null
+                      ? "Update Request"
+                      : "Submit Request",
+                  style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
                     color: Colors.white,
