@@ -17,6 +17,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _apartmentController = TextEditingController();
+  final _phoneController = TextEditingController();
   String _selectedCategory = 'Plumbing'; // Default category
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -46,9 +47,14 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     final uid = _authService.getCurrentUserId();
     if (uid != null) {
       final userData = await _firestoreService.getUser(uid);
-      if (userData != null && userData['apartment'] != null) {
+      if (userData != null) {
         setState(() {
-          _apartmentController.text = userData['apartment'];
+          if (userData['apartment'] != null) {
+            _apartmentController.text = userData['apartment'];
+          }
+          if (userData['phone'] != null) {
+            _phoneController.text = userData['phone'];
+          }
         });
       }
     }
@@ -149,6 +155,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
             availableDate: DateFormat('MMM dd, yyyy').format(_selectedDate!),
             availableTime: _selectedTime!.format(context),
             apartment: _apartmentController.text.trim(),
+            phone: _phoneController.text.trim(),
             imageUrl: imageUrl,
           );
           if (mounted) {
@@ -178,6 +185,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
     _titleController.dispose();
     _descriptionController.dispose();
     _apartmentController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -288,6 +296,26 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                       ),
                       validator: (value) => value == null || value.isEmpty
                           ? 'Apartment required'
+                          : null,
+                    ),
+                    const SizedBox(height: 24),
+
+                    // Phone Number Field
+                    _buildFieldLabel("Phone Number"),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1D3E72),
+                        fontSize: 16,
+                      ),
+                      decoration: _inputDecoration(
+                        "e.g., +1 234 567 890",
+                        Icons.phone_rounded,
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Phone number required'
                           : null,
                     ),
                     const SizedBox(height: 24),

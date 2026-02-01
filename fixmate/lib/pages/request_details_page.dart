@@ -191,6 +191,25 @@ class RequestDetailsPage extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.phone_rounded,
+                        size: 16,
+                        color: const Color(0xFF1D3E72).withOpacity(0.5),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "Contact: ${requestData['phone'] ?? 'N/A'}",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1D3E72),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   const Text(
                     "Description",

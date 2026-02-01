@@ -45,6 +45,7 @@ class FirestoreService {
     required String availableDate,
     required String availableTime,
     required String apartment,
+    required String phone,
     String? imageUrl,
   }) async {
     await _db.collection('requests').add({
@@ -55,6 +56,7 @@ class FirestoreService {
       'availableDate': availableDate,
       'availableTime': availableTime,
       'apartment': apartment,
+      'phone': phone,
       'imageUrl': imageUrl,
       'status': 'PENDING', // Default status
       'createdAt': FieldValue.serverTimestamp(),
