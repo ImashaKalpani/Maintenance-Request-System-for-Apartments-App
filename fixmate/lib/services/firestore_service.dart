@@ -61,6 +61,14 @@ class FirestoreService {
       'status': 'PENDING', // Default status
       'createdAt': FieldValue.serverTimestamp(),
     });
+
+    // Create a notification for the user
+    await createNotification(
+      uid: uid,
+      title: 'Request Submitted',
+      subtitle: 'Your request "$title" has been successfully submitted.',
+      type: 'request',
+    );
   }
 
   Future<String?> uploadRequestImage(File imageFile) async {
@@ -92,5 +100,40 @@ class FirestoreService {
     Map<String, dynamic> updateData,
   ) async {
     await _db.collection('requests').doc(requestId).update(updateData);
+  }
+
+  // ========== NOTIFICATIONS ==========
+
+  Stream<QuerySnapshot> getNotificationsStream(String uid) {
+    return _db
+        .collection('notifications')
+        .where('uid', isEqualTo: uid)
+        .snapshots();
+  }
+
+  Future<void> markNotificationAsRead(String notificationId) async {
+    await _db.collection('notifications').doc(notificationId).update({
+      'isRead': true,
+    });
+  }
+
+  Future<void> deleteNotification(String notificationId) async {
+    await _db.collection('notifications').doc(notificationId).delete();
+  }
+
+  Future<void> createNotification({
+    required String uid,
+    required String title,
+    required String subtitle,
+    required String type,
+  }) async {
+    await _db.collection('notifications').add({
+      'uid': uid,
+      'title': title,
+      'subtitle': subtitle,
+      'type': type,
+      'isRead': false,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
   }
 }

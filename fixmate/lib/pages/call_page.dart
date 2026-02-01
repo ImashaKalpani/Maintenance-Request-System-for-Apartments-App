@@ -100,215 +100,203 @@ class EmergencySupportPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // ---------- Sticky Header ----------
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              child: Stack(
-                alignment: Alignment.center,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF8FAFC),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text(
+          "Emergency Support",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF1D3E72),
+          ),
+        ),
+        leading: IconButton(
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const MainContainer()),
+                (route) => false,
+              );
+            }
+          },
+          icon: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: const Icon(
+              Icons.arrow_back_ios_new_rounded,
+              size: 20,
+              color: Color(0xFF1D3E72),
+            ),
+          ),
+        ),
+      ),
+      body: Column(
+        children: [
+          // ---------- Scrollable Content ----------
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: IconButton(
-                      onPressed: () {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        } else {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const MainContainer(),
-                            ),
-                            (route) => false,
-                          );
-                        }
-                      },
-                      icon: Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+                  const SizedBox(height: 20),
+
+                  PulseAnimation(
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          width: 260,
+                          height: 260,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.redAccent.withOpacity(0.15),
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          size: 20,
-                          color: Color(0xFF1D3E72),
+                        GestureDetector(
+                          onTap: () => _showConfirmation(context),
+                          child: Container(
+                            width: 170,
+                            height: 170,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.redAccent,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: const [
+                                Icon(
+                                  Icons.phone,
+                                  color: Colors.white,
+                                  size: 38,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "EMERGENCY",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 17,
+                                  ),
+                                ),
+                                Text(
+                                  "CALL NOW",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
+
+                  const SizedBox(height: 20),
                   const Text(
-                    "Emergency Support",
+                    "Need Immediate Help?",
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF1D3E72),
+                      color: Colors.black87,
                     ),
                   ),
-                ],
-              ),
-            ),
-
-            // ---------- Scrollable Content ----------
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 22),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
-
-                    PulseAnimation(
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 260,
-                            height: 260,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.redAccent.withOpacity(0.15),
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => _showConfirmation(context),
-                            child: Container(
-                              width: 170,
-                              height: 170,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.redAccent,
-                              ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: const [
-                                  Icon(
-                                    Icons.phone,
-                                    color: Colors.white,
-                                    size: 38,
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    "EMERGENCY",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 17,
-                                    ),
-                                  ),
-                                  Text(
-                                    "CALL NOW",
-                                    style: TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Press the button above to be connected\nwith our 24/7 on-site emergency response team.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      height: 1.4,
                     ),
+                  ),
 
-                    const SizedBox(height: 20),
-                    const Text(
-                      "Need Immediate Help?",
+                  const SizedBox(height: 28),
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Quick Contacts",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                         color: Colors.black87,
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Press the button above to be connected\nwith our 24/7 on-site emergency response team.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade700,
-                        height: 1.4,
-                      ),
-                    ),
+                  ),
+                  const SizedBox(height: 16),
 
-                    const SizedBox(height: 28),
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Quick Contacts",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black87,
+                  _buildQuickContact(
+                    "Security Desk",
+                    "Main Lobby Reception",
+                    Icons.shield,
+                  ),
+                  _buildQuickContact(
+                    "Maintenance Manager",
+                    "Building Issues & Repairs",
+                    Icons.build,
+                  ),
+                  _buildQuickContact(
+                    "Medical Emergency",
+                    "Nearest First Aid Response",
+                    Icons.medical_services,
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE9F2FF),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.info_outline,
+                          size: 22,
+                          color: Color(0xFF0A5CFF),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    _buildQuickContact(
-                      "Security Desk",
-                      "Main Lobby Reception",
-                      Icons.shield,
-                    ),
-                    _buildQuickContact(
-                      "Maintenance Manager",
-                      "Building Issues & Repairs",
-                      Icons.build,
-                    ),
-                    _buildQuickContact(
-                      "Medical Emergency",
-                      "Nearest First Aid Response",
-                      Icons.medical_services,
-                    ),
-
-                    const SizedBox(height: 20),
-
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE9F2FF),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.info_outline,
-                            size: 22,
-                            color: Color(0xFF0A5CFF),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              "For life-threatening emergencies requiring police, fire, or ambulance assistance, please dial 911 directly.",
-                              style: TextStyle(
-                                color: Colors.grey.shade800,
-                                fontSize: 14,
-                                height: 1.4,
-                                fontWeight: FontWeight.w500,
-                              ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            "For life-threatening emergencies requiring police, fire, or ambulance assistance, please dial 911 directly.",
+                            style: TextStyle(
+                              color: Colors.grey.shade800,
+                              fontSize: 14,
+                              height: 1.4,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
+                  ),
 
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
