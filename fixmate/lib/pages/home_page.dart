@@ -120,154 +120,212 @@ class _HomePageState extends State<HomePage> {
           ),
 
           SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                // Header Sliver
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "FixMate",
-                              style: TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w900,
-                                color: const Color(0xFF1D3E72),
-                                letterSpacing: -1,
-                              ),
-                            ),
-                            _buildNotificationIcon(),
-                          ],
-                        ),
-                        const SizedBox(height: 32),
-                        _buildHeroGreeting(),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Quick Action Section
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: _buildCreateRequestCard(),
-                  ),
-                ),
-
-                // Recent Requests Section
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 40, 24, 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              "Recent Requests",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF1D3E72),
-                                letterSpacing: -0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              "Track your latest maintenance picks",
-                              style: TextStyle(
-                                color: Colors.grey.shade500,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                        TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const RequestsPage(),
-                            ),
-                          ),
-                          child: const Text(
-                            "See All",
+            child: Column(
+              children: [
+                // Fixed Top Section
+                Container(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                  color: const Color(0xFFF8FAFC),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Apartment FixMate",
                             style: TextStyle(
-                              color: Color(0xFF00A8C6),
-                              fontWeight: FontWeight.w700,
+                              fontSize: 22,
+                              fontWeight: FontWeight.w900,
+                              color: const Color(0xFF1D3E72),
+                              letterSpacing: -1,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                          Row(
+                            children: [
+                              _buildNotificationIcon(),
+                              const SizedBox(width: 12),
+                              _buildHeaderAvatar(),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      _buildHeroGreeting(),
+                      const SizedBox(height: 24),
+                      _buildCreateRequestCard(),
+                    ],
                   ),
                 ),
 
-                // Request List Sliver
-                _uid == null
-                    ? const SliverFillRemaining(
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : StreamBuilder<QuerySnapshot>(
-                        stream: _firestoreService.getRequestsStream(_uid!),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const SliverToBoxAdapter(
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
-
-                          if (!snapshot.hasData ||
-                              snapshot.data!.docs.isEmpty) {
-                            return SliverToBoxAdapter(
-                              child: _buildEmptyState(),
-                            );
-                          }
-
-                          final requests = snapshot.data!.docs;
-                          requests.sort((a, b) {
-                            final aTime =
-                                (a['createdAt'] as Timestamp?)?.toDate() ??
-                                DateTime.now();
-                            final bTime =
-                                (b['createdAt'] as Timestamp?)?.toDate() ??
-                                DateTime.now();
-                            return bTime.compareTo(aTime);
-                          });
-
-                          return SliverPadding(
-                            padding: const EdgeInsets.symmetric(horizontal: 24),
-                            sliver: SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) {
-                                  if (index >= 3)
-                                    return null; // Only show top 3
-                                  final doc = requests[index];
-                                  final data =
-                                      doc.data() as Map<String, dynamic>;
-                                  return Padding(
-                                    padding: const EdgeInsets.only(bottom: 16),
-                                    child: _buildGlassRequestCard(doc.id, data),
-                                  );
-                                },
-                                childCount: requests.length > 3
-                                    ? 3
-                                    : requests.length,
+                // Scrollable Section
+                Expanded(
+                  child: CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 16,
+                                crossAxisSpacing: 16,
+                                childAspectRatio: 1.4,
                               ),
+                          delegate: SliverChildListDelegate([
+                            _buildAdviceCard(
+                              "Maintenance",
+                              "Quick home tips",
+                              Icons.build_circle_outlined,
+                              Colors.blue,
                             ),
-                          );
-                        },
+                            _buildAdviceCard(
+                              "Safety Guide",
+                              "Stay safe & secure",
+                              Icons.security_outlined,
+                              Colors.orange,
+                            ),
+                            _buildAdviceCard(
+                              "Help Center",
+                              "FAQ & Support",
+                              Icons.help_outline_rounded,
+                              Colors.teal,
+                            ),
+                            _buildAdviceCard(
+                              "Rules",
+                              "Community living",
+                              Icons.gavel_rounded,
+                              Colors.purple,
+                            ),
+                          ]),
+                        ),
                       ),
 
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                      // Recent Requests Section
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Recent Requests",
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w800,
+                                      color: Color(0xFF1D3E72),
+                                      letterSpacing: -0.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    "Track your latest maintenance picks",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const RequestsPage(),
+                                  ),
+                                ),
+                                child: const Text(
+                                  "See All",
+                                  style: TextStyle(
+                                    color: Color(0xFF00A8C6),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Request List Sliver
+                      _uid == null
+                          ? const SliverFillRemaining(
+                              child: Center(child: CircularProgressIndicator()),
+                            )
+                          : StreamBuilder<QuerySnapshot>(
+                              stream: _firestoreService.getRequestsStream(
+                                _uid!,
+                              ),
+                              builder: (context, snapshot) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
+                                  return const SliverToBoxAdapter(
+                                    child: Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+
+                                if (!snapshot.hasData ||
+                                    snapshot.data!.docs.isEmpty) {
+                                  return SliverToBoxAdapter(
+                                    child: _buildEmptyState(),
+                                  );
+                                }
+
+                                final requests = snapshot.data!.docs;
+                                requests.sort((a, b) {
+                                  final aTime =
+                                      (a['createdAt'] as Timestamp?)
+                                          ?.toDate() ??
+                                      DateTime.now();
+                                  final bTime =
+                                      (b['createdAt'] as Timestamp?)
+                                          ?.toDate() ??
+                                      DateTime.now();
+                                  return bTime.compareTo(aTime);
+                                });
+
+                                return SliverPadding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                  ),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                      (context, index) {
+                                        if (index >= 3)
+                                          return null; // Only show top 3
+                                        final doc = requests[index];
+                                        final data =
+                                            doc.data() as Map<String, dynamic>;
+                                        return Padding(
+                                          padding: const EdgeInsets.only(
+                                            bottom: 16,
+                                          ),
+                                          child: _buildGlassRequestCard(
+                                            doc.id,
+                                            data,
+                                          ),
+                                        );
+                                      },
+                                      childCount: requests.length > 3
+                                          ? 3
+                                          : requests.length,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+
+                      const SliverToBoxAdapter(child: SizedBox(height: 100)),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -283,7 +341,8 @@ class _HomePageState extends State<HomePage> {
         MaterialPageRoute(builder: (_) => const NotificationPage()),
       ),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
@@ -296,6 +355,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         child: Stack(
+          alignment: Alignment.center,
           children: [
             const Icon(
               Icons.notifications_none_rounded,
@@ -303,8 +363,8 @@ class _HomePageState extends State<HomePage> {
               size: 24,
             ),
             Positioned(
-              right: 2,
-              top: 2,
+              right: 12,
+              top: 12,
               child: Container(
                 width: 8,
                 height: 8,
@@ -321,41 +381,34 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeroGreeting() {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Welcome back,",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-              Text(
-                _userName,
-                style: const TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  color: Color(0xFF1D3E72),
-                  letterSpacing: -1,
-                ),
-              ),
-            ],
+        Text(
+          "Hello,",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade600,
           ),
         ),
-        _buildGradientAvatar(),
+        Text(
+          _userName,
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w900,
+            color: Color(0xFF1D3E72),
+            letterSpacing: -1,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildGradientAvatar() {
+  Widget _buildHeaderAvatar() {
     return Container(
-      width: 60,
-      height: 60,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: LinearGradient(
@@ -366,8 +419,8 @@ class _HomePageState extends State<HomePage> {
         boxShadow: [
           BoxShadow(
             color: const Color(0xFF00A8C6).withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -375,7 +428,7 @@ class _HomePageState extends State<HomePage> {
       child: Text(
         _userName.isNotEmpty ? _userName[0].toUpperCase() : 'U',
         style: const TextStyle(
-          fontSize: 24,
+          fontSize: 18,
           fontWeight: FontWeight.w800,
           color: Colors.white,
         ),
@@ -552,15 +605,31 @@ class _HomePageState extends State<HomePage> {
                       ],
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      data['description'] ?? '',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.grey.shade500,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            data['description'] ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          _formatDate(data['createdAt'] as Timestamp?),
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -609,6 +678,73 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAdviceCard(
+    String title,
+    String subtitle,
+    IconData icon,
+    Color color,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {},
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: color, size: 20),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 14,
+                        color: Color(0xFF1D3E72),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
