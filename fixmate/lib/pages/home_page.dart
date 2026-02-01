@@ -175,28 +175,28 @@ class _HomePageState extends State<HomePage> {
                               ),
                           delegate: SliverChildListDelegate([
                             _buildAdviceCard(
-                              "Maintenance",
-                              "Quick home tips",
-                              Icons.build_circle_outlined,
-                              Colors.blue,
+                              "Electrical Safety",
+                              "Check cords & outlets",
+                              Icons.electrical_services_rounded,
+                              Colors.amber,
                             ),
                             _buildAdviceCard(
-                              "Safety Guide",
-                              "Stay safe & secure",
-                              Icons.security_outlined,
-                              Colors.orange,
+                              "Be Emergency Ready",
+                              "Know exits & kits",
+                              Icons.health_and_safety_rounded,
+                              Colors.redAccent,
                             ),
                             _buildAdviceCard(
-                              "Help Center",
-                              "FAQ & Support",
-                              Icons.help_outline_rounded,
-                              Colors.teal,
+                              "Save Water",
+                              "Fix leaks promptly",
+                              Icons.water_drop_rounded,
+                              Colors.cyan,
                             ),
                             _buildAdviceCard(
-                              "Rules",
-                              "Community living",
-                              Icons.gavel_rounded,
-                              Colors.purple,
+                              "Keep Clean",
+                              "Respect shared spaces",
+                              Icons.cleaning_services_rounded,
+                              Colors.green,
                             ),
                           ]),
                         ),
@@ -691,12 +691,12 @@ class _HomePageState extends State<HomePage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: color.withOpacity(0.12),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -704,42 +704,92 @@ class _HomePageState extends State<HomePage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {},
-          borderRadius: BorderRadius.circular(20),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  color.withOpacity(0.05),
+                  color.withOpacity(0.01),
+                  Colors.white,
+                ],
+              ),
+            ),
+            child: Stack(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
-                    shape: BoxShape.circle,
+                // Decorative Background Circle
+                Positioned(
+                  right: -10,
+                  bottom: -10,
+                  child: Container(
+                    width: 70,
+                    height: 70,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.08),
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                  child: Icon(icon, color: color, size: 20),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 14,
-                        color: Color(0xFF1D3E72),
+
+                // Content
+                Padding(
+                  padding: const EdgeInsets.all(18.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withOpacity(0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(icon, color: color, size: 24),
                       ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w500,
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 15, // Slightly larger
+                              color: Color(0xFF1D3E72),
+                              height: 1.2,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          const SizedBox(height: 5),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  subtitle,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
