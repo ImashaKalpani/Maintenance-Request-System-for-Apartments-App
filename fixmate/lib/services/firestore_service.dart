@@ -35,6 +35,11 @@ class FirestoreService {
   Future<void> deleteUser(String uid) async {
     await _db.collection('users').doc(uid).delete();
   }
+
+  /// Update user data in Firestore
+  Future<void> updateUser(String uid, Map<String, dynamic> updateData) async {
+    await _db.collection('users').doc(uid).update(updateData);
+  }
   // ========== REQUESTS ==========
 
   Future<void> createRequest({

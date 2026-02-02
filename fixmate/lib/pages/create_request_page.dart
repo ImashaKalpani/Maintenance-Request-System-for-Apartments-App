@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import '../services/auth_service.dart';
 import '../services/firestore_service.dart';
 
@@ -25,7 +23,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
   String _selectedCategory = 'Plumbing'; // Default category
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  File? _imageFile;
   bool _isLoading = false;
 
   final List<String> _categories = [
@@ -39,7 +36,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
 
   final FirestoreService _firestoreService = FirestoreService();
   final AuthService _authService = AuthService();
-  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -78,22 +74,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           }
         });
       }
-    }
-  }
-
-  Future<void> _pickImage() async {
-    try {
-      final pickedFile = await _picker.pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 70,
-      );
-      if (pickedFile != null) {
-        setState(() {
-          _imageFile = File(pickedFile.path);
-        });
-      }
-    } catch (e) {
-      debugPrint("Error picking image: $e");
     }
   }
 
@@ -163,11 +143,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
       try {
         final uid = _authService.getCurrentUserId();
         if (uid != null) {
-          String? imageUrl;
-          if (_imageFile != null) {
-            imageUrl = await _firestoreService.uploadRequestImage(_imageFile!);
-          }
-
           if (widget.requestId != null) {
             // Update existing request
             await _firestoreService.updateRequest(widget.requestId!, {
@@ -180,7 +155,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               'availableTime': _selectedTime!.format(context),
               'apartment': _apartmentController.text.trim(),
               'phone': _phoneController.text.trim(),
-              if (imageUrl != null) 'imageUrl': imageUrl,
               'status':
                   'PENDING', // Reset status or keep? Let's reset for review.
               'updatedAt': FieldValue.serverTimestamp(),
@@ -196,7 +170,7 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               availableTime: _selectedTime!.format(context),
               apartment: _apartmentController.text.trim(),
               phone: _phoneController.text.trim(),
-              imageUrl: imageUrl,
+              imageUrl: null,
             );
           }
           if (mounted) {
@@ -390,11 +364,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
                     ),
                     const SizedBox(height: 24),
 
-                    // Image Attachment
-                    _buildFieldLabel("Attach Image (Optional)"),
-                    _buildImagePicker(),
-                    const SizedBox(height: 24),
-
                     // Description Field
                     _buildFieldLabel("Description"),
                     TextFormField(
@@ -439,76 +408,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
           color: Color(0xFF1D3E72),
           letterSpacing: -0.3,
         ),
-      ),
-    );
-  }
-
-  Widget _buildImagePicker() {
-    return GestureDetector(
-      onTap: _pickImage,
-      child: Container(
-        width: double.infinity,
-        height: 140,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.grey[300]!, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: _imageFile != null
-            ? Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: Image.file(_imageFile!, fit: BoxFit.cover),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: () => setState(() => _imageFile = null),
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                          color: Colors.redAccent,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.close_rounded,
-                          color: Colors.white,
-                          size: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.add_photo_alternate_outlined,
-                    size: 40,
-                    color: const Color(0xFF00A8C6).withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    "Add a photo of the issue",
-                    style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
       ),
     );
   }
