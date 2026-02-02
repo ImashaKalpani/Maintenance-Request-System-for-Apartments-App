@@ -775,6 +775,52 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       "Created",
                       _formatDate(data['createdAt']),
                     ),
+                    if (data['adminComment'] != null &&
+                        data['adminComment'].toString().isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00A8C6).withOpacity(0.05),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: const Color(0xFF00A8C6).withOpacity(0.1),
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.comment_rounded,
+                                  size: 14,
+                                  color: Color(0xFF00A8C6),
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Admin Comment",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF00A8C6),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              data['adminComment'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade700,
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -798,7 +844,32 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                             ),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          onPressed: () => _showCommentDialog(
+                            docId,
+                            data['adminComment'] ?? '',
+                            data['uid'],
+                            data['title'] ?? 'Untitled',
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            foregroundColor: const Color(0xFF1D3E72),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: const Color(0xFF1D3E72).withOpacity(0.1),
+                              ),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Icon(Icons.comment_rounded, size: 20),
+                        ),
+                        const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () => _showDeleteConfirmation(docId),
                           style: ElevatedButton.styleFrom(
@@ -865,6 +936,94 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           overflow: isLongText ? null : TextOverflow.ellipsis,
         ),
       ],
+    );
+  }
+
+  void _showCommentDialog(
+    String docId,
+    String existingComment,
+    String userUid,
+    String requestTitle,
+  ) {
+    final TextEditingController commentController = TextEditingController(
+      text: existingComment,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          "Admin Comment",
+          style: TextStyle(
+            color: Color(0xFF1D3E72),
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: commentController,
+              maxLines: 4,
+              decoration: InputDecoration(
+                hintText: "Add instructions or feedback...",
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "Cancel",
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final comment = commentController.text.trim();
+              await _firestoreService.updateRequest(docId, {
+                'adminComment': comment,
+              });
+
+              // Send notification to user
+              if (comment.isNotEmpty) {
+                await _firestoreService.createNotification(
+                  uid: userUid,
+                  title: 'New Admin Comment',
+                  subtitle: 'Admin commented on "$requestTitle": $comment',
+                  type: 'update',
+                );
+              }
+
+              if (mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Comment updated"),
+                    backgroundColor: Color(0xFF00A8C6),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1D3E72),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: const Text("Save", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
     );
   }
 

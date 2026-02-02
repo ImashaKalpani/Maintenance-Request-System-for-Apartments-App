@@ -224,9 +224,12 @@ class _NotificationPageState extends State<NotificationPage> {
 
   Widget _buildAppBar(BuildContext context) {
     return SliverAppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: const Color(0xFFF8FAFC),
+      surfaceTintColor: const Color(0xFFF8FAFC),
       elevation: 0,
       pinned: true,
+      scrolledUnderElevation: 2,
+      shadowColor: Colors.black.withOpacity(0.1),
       leading: IconButton(
         onPressed: () => Navigator.pop(context),
         icon: Container(

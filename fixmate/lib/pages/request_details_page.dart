@@ -260,6 +260,7 @@ class RequestDetailsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 24),
+                  const SizedBox(height: 24),
                   const Text(
                     "Description",
                     style: TextStyle(
@@ -279,6 +280,64 @@ class RequestDetailsPage extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
+                  // Admin Comment section
+                  if (requestData['adminComment'] != null &&
+                      requestData['adminComment'].toString().isNotEmpty) ...[
+                    const SizedBox(height: 32),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1D3E72).withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: const Color(0xFF1D3E72).withOpacity(0.08),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(
+                                    0xFF1D3E72,
+                                  ).withOpacity(0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.chat_bubble_rounded,
+                                  color: Color(0xFF1D3E72),
+                                  size: 16,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                "Admin Response",
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF1D3E72),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            requestData['adminComment'],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey.shade700,
+                              height: 1.5,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
