@@ -113,6 +113,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                   (doc.data() as Map<String, dynamic>)['status'] == 'PENDING',
             )
             .length;
+        final acceptedCount = allRequests
+            .where(
+              (doc) =>
+                  (doc.data() as Map<String, dynamic>)['status'] == 'ACCEPTED',
+            )
+            .length;
         final inProgressCount = allRequests
             .where(
               (doc) =>
@@ -141,7 +147,15 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       Colors.orange,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _buildStatCard(
+                      "Accepted",
+                      acceptedCount,
+                      const Color(0xFF00A8C6),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: _buildStatCard(
                       "Active",
@@ -149,7 +163,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       Colors.blue,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: _buildStatCard("Done", completedCount, Colors.green),
                   ),
@@ -165,6 +179,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                   _buildFilterChip("All"),
                   const SizedBox(width: 8),
                   _buildFilterChip("Pending"),
+                  const SizedBox(width: 8),
+                  _buildFilterChip("Accepted"),
                   const SizedBox(width: 8),
                   _buildFilterChip("In Progress"),
                   const SizedBox(width: 8),
@@ -551,6 +567,9 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       case 'PENDING':
         statusColor = Colors.orange;
         break;
+      case 'ACCEPTED':
+        statusColor = const Color(0xFF00A8C6);
+        break;
       case 'IN PROGRESS':
         statusColor = Colors.blue;
         break;
@@ -795,8 +814,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: () =>
-                                _showStatusUpdateSheet(docId, status),
+                            onPressed: () => _showStatusUpdateSheet(
+                              docId,
+                              status,
+                              data['uid'],
+                              data['title'] ?? 'Untitled',
+                            ),
                             icon: const Icon(Icons.edit_rounded, size: 18),
                             label: const Text("Update Status"),
                             style: ElevatedButton.styleFrom(
@@ -989,7 +1012,12 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
     );
   }
 
-  void _showStatusUpdateSheet(String docId, String currentStatus) {
+  void _showStatusUpdateSheet(
+    String docId,
+    String currentStatus,
+    String userUid,
+    String requestTitle,
+  ) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -1033,6 +1061,17 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 "PENDING",
                 Colors.orange,
                 currentStatus == "PENDING",
+                userUid: userUid,
+                requestTitle: requestTitle,
+              ),
+              const SizedBox(height: 12),
+              _buildStatusOption(
+                docId,
+                "ACCEPTED",
+                const Color(0xFF00A8C6),
+                currentStatus == "ACCEPTED",
+                userUid: userUid,
+                requestTitle: requestTitle,
               ),
               const SizedBox(height: 12),
               _buildStatusOption(
@@ -1040,6 +1079,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 "IN PROGRESS",
                 Colors.blue,
                 currentStatus == "IN PROGRESS",
+                userUid: userUid,
+                requestTitle: requestTitle,
               ),
               const SizedBox(height: 12),
               _buildStatusOption(
@@ -1047,6 +1088,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 "COMPLETED",
                 Colors.green,
                 currentStatus == "COMPLETED",
+                userUid: userUid,
+                requestTitle: requestTitle,
               ),
               const SizedBox(height: 12),
             ],
@@ -1060,20 +1103,33 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
     String docId,
     String status,
     Color color,
-    bool isSelected,
-  ) {
+    bool isSelected, {
+    required String userUid,
+    required String requestTitle,
+  }) {
     return InkWell(
-      onTap: () {
-        _firestoreService.updateRequest(docId, {'status': status});
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Status updated to $status"),
-            backgroundColor: color,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 2),
-          ),
+      onTap: () async {
+        await _firestoreService.updateRequest(docId, {'status': status});
+
+        // Send notification to user
+        await _firestoreService.createNotification(
+          uid: userUid,
+          title: 'Request Status Updated',
+          subtitle: 'Your request "$requestTitle" is now $status.',
+          type: 'status',
         );
+
+        if (mounted) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Status updated to $status"),
+              backgroundColor: color,
+              behavior: SnackBarBehavior.floating,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(
