@@ -1,11 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'dart:io';
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Future<void> saveUser({
     required String uid,
@@ -51,7 +47,6 @@ class FirestoreService {
     required String availableTime,
     required String apartment,
     required String phone,
-    String? imageUrl,
   }) async {
     await _db.collection('requests').add({
       'uid': uid,
@@ -62,7 +57,6 @@ class FirestoreService {
       'availableTime': availableTime,
       'apartment': apartment,
       'phone': phone,
-      'imageUrl': imageUrl,
       'status': 'PENDING', // Default status
       'createdAt': FieldValue.serverTimestamp(),
     });
@@ -89,18 +83,6 @@ class FirestoreService {
         .collection('notifications')
         .where('uid', isEqualTo: 'admin')
         .snapshots();
-  }
-
-  Future<String?> uploadRequestImage(File imageFile) async {
-    try {
-      final fileName = 'request_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = _storage.ref().child('request_images').child(fileName);
-      await ref.putFile(imageFile);
-      return await ref.getDownloadURL();
-    } catch (e) {
-      debugPrint("Error uploading image: $e");
-      return null;
-    }
   }
 
   Stream<QuerySnapshot> getRequestsStream(String uid) {

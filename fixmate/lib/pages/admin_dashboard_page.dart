@@ -775,45 +775,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                       "Created",
                       _formatDate(data['createdAt']),
                     ),
-                    if (data['imageUrl'] != null) ...[
-                      const SizedBox(height: 16),
-                      const Text(
-                        "Attached Image",
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1D3E72),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      GestureDetector(
-                        onTap: () => _showImageDialog(data['imageUrl']),
-                        child: Container(
-                          height: 150,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            image: DecorationImage(
-                              image: NetworkImage(data['imageUrl']),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: Colors.black.withOpacity(0.1),
-                            ),
-                            child: const Center(
-                              child: Icon(
-                                Icons.zoom_in_rounded,
-                                color: Colors.white,
-                                size: 32,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                     const SizedBox(height: 16),
                     Row(
                       children: [
@@ -904,43 +865,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           overflow: isLongText ? null : TextOverflow.ellipsis,
         ),
       ],
-    );
-  }
-
-  void _showImageDialog(String imageUrl) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(10),
-        child: Stack(
-          alignment: Alignment.topRight,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(16),
-              child: Image.network(imageUrl, fit: BoxFit.contain),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.close_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

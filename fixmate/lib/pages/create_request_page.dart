@@ -170,7 +170,6 @@ class _CreateRequestPageState extends State<CreateRequestPage> {
               availableTime: _selectedTime!.format(context),
               apartment: _apartmentController.text.trim(),
               phone: _phoneController.text.trim(),
-              imageUrl: null,
             );
           }
           if (mounted) {
