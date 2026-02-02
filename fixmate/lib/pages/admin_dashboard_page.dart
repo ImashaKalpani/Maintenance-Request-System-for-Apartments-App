@@ -20,6 +20,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   final AuthService _authService = AuthService();
 
   late TabController _tabController;
+  final TextEditingController _searchController = TextEditingController();
+  String _activeSearchQuery = '';
   String _selectedFilter = 'All';
   String? _expandedCardId;
 
@@ -32,6 +34,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -104,13 +107,29 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         }
 
         final allRequests = snapshot.data!.docs;
-        final filteredRequests = _selectedFilter == 'All'
-            ? allRequests
-            : allRequests.where((doc) {
-                final data = doc.data() as Map<String, dynamic>;
-                return (data['status'] ?? 'PENDING') ==
-                    _selectedFilter.toUpperCase();
-              }).toList();
+        final searchQuery = _activeSearchQuery.toLowerCase();
+
+        final filteredRequests = allRequests.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          final status = (data['status'] ?? 'PENDING').toString().toUpperCase();
+
+          // Status filter
+          final matchesStatus =
+              _selectedFilter == 'All' ||
+              status == _selectedFilter.toUpperCase();
+
+          // Search filter
+          final title = (data['title'] ?? '').toString().toLowerCase();
+          final desc = (data['description'] ?? '').toString().toLowerCase();
+          final apt = (data['apartment'] ?? '').toString().toLowerCase();
+          final matchesSearch =
+              searchQuery.isEmpty ||
+              title.contains(searchQuery) ||
+              desc.contains(searchQuery) ||
+              apt.contains(searchQuery);
+
+          return matchesStatus && matchesSearch;
+        }).toList();
 
         final pendingCount = allRequests
             .where(
@@ -140,6 +159,68 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
 
         return Column(
           children: [
+            // Search Bar Section
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              color: Colors.white,
+              child: TextField(
+                controller: _searchController,
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) {
+                  setState(() {
+                    _activeSearchQuery = value.trim();
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: "Search by title, description, or apt...",
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: IconButton(
+                    icon: const Icon(
+                      Icons.search_rounded,
+                      color: Color(0xFF00A8C6),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _activeSearchQuery = _searchController.text.trim();
+                      });
+                    },
+                  ),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 18),
+                          onPressed: () {
+                            _searchController.clear();
+                            setState(() {
+                              _activeSearchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
+                  filled: true,
+                  fillColor: Colors.grey.shade50,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 0),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Colors.grey.shade200),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide(color: Colors.grey.shade100),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF00A8C6),
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Container(
               padding: const EdgeInsets.all(20),
               color: Colors.white,
@@ -197,12 +278,26 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
             Expanded(
               child: filteredRequests.isEmpty
                   ? Center(
-                      child: Text(
-                        "No ${_selectedFilter.toLowerCase()} requests",
-                        style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 16,
-                        ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 64,
+                            color: Colors.grey.shade200,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _activeSearchQuery.isNotEmpty
+                                ? "No results found for \"$_activeSearchQuery\""
+                                : "No ${_selectedFilter.toLowerCase()} requests",
+                            style: TextStyle(
+                              color: Colors.grey.shade500,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
                     )
                   : ListView.separated(
