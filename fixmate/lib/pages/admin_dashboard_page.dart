@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
+import 'manage_users_page.dart';
 
 class AdminDashboardPage extends StatefulWidget {
   const AdminDashboardPage({super.key});
@@ -20,7 +21,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   late TabController _tabController;
   String _selectedFilter = 'All';
   String? _expandedCardId;
-  String? _expandedUserId;
 
   @override
   void initState() {
@@ -322,226 +322,29 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
                 ],
               ),
             ),
-
-            // Scrollable User List Section
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                itemCount: users.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return const Padding(
-                      padding: EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        "All Users",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF1D3E72),
-                        ),
-                      ),
-                    );
-                  }
-
-                  final doc = users[index - 1];
-                  final userId = doc.id;
-                  final data = doc.data() as Map<String, dynamic>;
-                  final isExpanded = _expandedUserId == userId;
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.04),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Column(
-                        children: [
-                          InkWell(
-                            onTap: () => setState(
-                              () =>
-                                  _expandedUserId = isExpanded ? null : userId,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 24,
-                                    backgroundColor: const Color(
-                                      0xFF00A8C6,
-                                    ).withOpacity(0.1),
-                                    child: Text(
-                                      (data['name'] ?? 'U')[0].toUpperCase(),
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.w800,
-                                        color: Color(0xFF00A8C6),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          data['name'] ?? 'Unknown',
-                                          style: const TextStyle(
-                                            fontSize: 15,
-                                            fontWeight: FontWeight.w700,
-                                            color: Color(0xFF1D3E72),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          data['email'] ?? '',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: Colors.grey.shade600,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade100,
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Text(
-                                      data['apartment'] ?? 'N/A',
-                                      style: const TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    isExpanded
-                                        ? Icons.keyboard_arrow_up_rounded
-                                        : Icons.keyboard_arrow_down_rounded,
-                                    color: Colors.grey.shade400,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (isExpanded) ...[
-                            Divider(height: 1, color: Colors.grey.shade100),
-                            Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _buildUserDetailRow(
-                                    Icons.person_outline_rounded,
-                                    "Name",
-                                    data['name'] ?? 'Unknown',
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildUserDetailRow(
-                                    Icons.email_outlined,
-                                    "Email",
-                                    data['email'] ?? 'N/A',
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildUserDetailRow(
-                                    Icons.phone_rounded,
-                                    "Phone",
-                                    data['phone'] ?? 'N/A',
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildUserDetailRow(
-                                    Icons.apartment_rounded,
-                                    "Apartment",
-                                    data['apartment'] ?? 'N/A',
-                                  ),
-                                  const SizedBox(height: 12),
-                                  _buildUserDetailRow(
-                                    Icons.admin_panel_settings_outlined,
-                                    "Role",
-                                    data['role'] ?? 'user',
-                                  ),
-                                  const SizedBox(height: 16),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: ElevatedButton.icon(
-                                          onPressed: () =>
-                                              _showEditUserDialog(userId, data),
-                                          icon: const Icon(
-                                            Icons.edit_rounded,
-                                            size: 18,
-                                          ),
-                                          label: const Text("Edit User"),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(
-                                              0xFF1D3E72,
-                                            ),
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              vertical: 12,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      ElevatedButton(
-                                        onPressed: () =>
-                                            _showDeleteUserConfirmation(
-                                              userId,
-                                              data['name'] ?? 'this user',
-                                            ),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.red.shade50,
-                                          foregroundColor: Colors.red,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 12,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                          ),
-                                        ),
-                                        child: const Icon(
-                                          Icons.delete_outline_rounded,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
+            // Manage Users Button
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ManageUsersPage(),
                     ),
                   );
                 },
+                icon: const Icon(Icons.manage_accounts_rounded),
+                label: const Text("Manage All Users"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1D3E72),
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 56),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 2,
+                ),
               ),
             ),
           ],
@@ -551,8 +354,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   }
 
   int _extractFloorFromApartment(String apartment) {
-    // Extract floor from apartment code (e.g., "1-02" -> 1, "8-15" -> 8)
-    // Format: FloorNumber-ApartmentNumber
     if (apartment.isEmpty) return 0;
 
     final parts = apartment.split('-');
@@ -562,7 +363,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         return floorNumber;
       }
     }
-    return 0; // Invalid floor
+    return 0;
   }
 
   List<PieChartSectionData> _buildFloorPieChartSections(
@@ -715,11 +516,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   }
 
   Widget _buildFilterChip(String label) {
-    bool isSelected =
-        _selectedFilter == label ||
-        (_selectedFilter == "All" && label == "All");
-    if (label != 'All' && _selectedFilter == label.toUpperCase())
+    bool isSelected = _selectedFilter == label;
+    if (label != 'All' && _selectedFilter == label.toUpperCase()) {
       isSelected = true;
+    }
 
     return ActionChip(
       label: Text(label),
@@ -1307,264 +1107,6 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
               Icon(Icons.check_circle_rounded, color: color, size: 22),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildUserDetailRow(IconData icon, String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(icon, size: 14, color: const Color(0xFF00A8C6)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF00A8C6),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade700,
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showDeleteUserConfirmation(String userId, String userName) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.warning_rounded,
-                color: Colors.red,
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              "Delete User",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
-        content: Text(
-          "Are you sure you want to delete $userName? This action cannot be undone.",
-          style: const TextStyle(fontSize: 14),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Cancel",
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await _firestoreService.deleteUser(userId);
-              if (mounted) {
-                setState(() => _expandedUserId = null);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("User deleted successfully"),
-                    backgroundColor: Colors.red,
-                    behavior: SnackBarBehavior.floating,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              "Delete",
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditUserDialog(String userId, Map<String, dynamic> currentData) {
-    final nameController = TextEditingController(
-      text: currentData['name'] ?? '',
-    );
-    final phoneController = TextEditingController(
-      text: currentData['phone'] ?? '',
-    );
-    final apartmentController = TextEditingController(
-      text: currentData['apartment'] ?? '',
-    );
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1D3E72).withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.edit_rounded,
-                color: Color(0xFF1D3E72),
-                size: 24,
-              ),
-            ),
-            const SizedBox(width: 12),
-            const Text(
-              "Edit User",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
-            ),
-          ],
-        ),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  labelText: "Name",
-                  prefixIcon: const Icon(
-                    Icons.person_outline_rounded,
-                    color: Color(0xFF00A8C6),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF00A8C6),
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: phoneController,
-                decoration: InputDecoration(
-                  labelText: "Phone",
-                  prefixIcon: const Icon(
-                    Icons.phone_rounded,
-                    color: Color(0xFF00A8C6),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF00A8C6),
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: apartmentController,
-                decoration: InputDecoration(
-                  labelText: "Apartment",
-                  prefixIcon: const Icon(
-                    Icons.apartment_rounded,
-                    color: Color(0xFF00A8C6),
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Color(0xFF00A8C6),
-                      width: 2,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              "Cancel",
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final updateData = {
-                'name': nameController.text.trim(),
-                'phone': phoneController.text.trim(),
-                'apartment': apartmentController.text.trim(),
-              };
-              Navigator.pop(context);
-              await _firestoreService.updateUser(userId, updateData);
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("User updated successfully"),
-                    backgroundColor: Colors.green,
-                    behavior: SnackBarBehavior.floating,
-                    duration: Duration(seconds: 2),
-                  ),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1D3E72),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: const Text(
-              "Save",
-              style: TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
       ),
     );
   }
