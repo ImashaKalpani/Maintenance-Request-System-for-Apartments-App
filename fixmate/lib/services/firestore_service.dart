@@ -74,6 +74,21 @@ class FirestoreService {
       subtitle: 'Your request "$title" has been successfully submitted.',
       type: 'request',
     );
+
+    // Create a notification for the admin
+    await createNotification(
+      uid: 'admin',
+      title: 'New Maintenance Request',
+      subtitle: 'A new request "$title" has been submitted from $apartment.',
+      type: 'request',
+    );
+  }
+
+  Stream<QuerySnapshot> getAdminNotificationsStream() {
+    return _db
+        .collection('notifications')
+        .where('uid', isEqualTo: 'admin')
+        .snapshots();
   }
 
   Future<String?> uploadRequestImage(File imageFile) async {

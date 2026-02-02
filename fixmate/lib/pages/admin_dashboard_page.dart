@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import '../services/firestore_service.dart';
 import '../services/auth_service.dart';
 import 'login_page.dart';
@@ -25,7 +26,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -61,6 +62,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
           tabs: const [
             Tab(text: "Home", icon: Icon(Icons.home_rounded, size: 20)),
             Tab(text: "Users", icon: Icon(Icons.people_rounded, size: 20)),
+            Tab(
+              text: "Notifications",
+              icon: Icon(Icons.notifications_rounded, size: 20),
+            ),
           ],
         ),
         actions: [
@@ -81,7 +86,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [_buildHomeTab(), _buildUsersTab()],
+        children: [_buildHomeTab(), _buildUsersTab(), _buildNotificationsTab()],
       ),
     );
   }
@@ -1097,6 +1102,221 @@ class _AdminDashboardPageState extends State<AdminDashboardPage>
         );
       },
     );
+  }
+
+  Widget _buildNotificationsTab() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestoreService.getAdminNotificationsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return _buildEmptyNotificationsState();
+        }
+
+        final docs = snapshot.data!.docs;
+        // Sort by creation time descending
+        docs.sort((a, b) {
+          final aT = (a['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+          final bT = (b['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+          return bT.compareTo(aT);
+        });
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(20),
+          itemCount: docs.length,
+          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final doc = docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+            return Dismissible(
+              key: Key(doc.id),
+              direction: DismissDirection.endToStart,
+              background: Container(
+                alignment: Alignment.centerRight,
+                padding: const EdgeInsets.only(right: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Icon(
+                  Icons.delete_outline_rounded,
+                  color: Colors.red.shade400,
+                ),
+              ),
+              onDismissed: (_) => _firestoreService.deleteNotification(doc.id),
+              child: _buildAdminNotifItem(
+                title: data['title'] ?? 'Notice',
+                subtitle: data['subtitle'] ?? '',
+                time: _formatNotifTime(data['createdAt']),
+                isNew: !(data['isRead'] ?? false),
+                onTap: () {
+                  if (!(data['isRead'] ?? false)) {
+                    _firestoreService.markNotificationAsRead(doc.id);
+                  }
+                },
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildAdminNotifItem({
+    required String title,
+    required String subtitle,
+    required String time,
+    required bool isNew,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(24),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 15,
+              offset: const Offset(0, 8),
+            ),
+          ],
+          border: isNew
+              ? Border.all(
+                  color: const Color(0xFF00A8C6).withOpacity(0.15),
+                  width: 1.5,
+                )
+              : null,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isNew
+                    ? const Color(0xFF00A8C6).withOpacity(0.12)
+                    : const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                Icons.handyman_rounded,
+                color: isNew
+                    ? const Color(0xFF00A8C6)
+                    : const Color(0xFF1D3E72),
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: Color(0xFF1D3E72),
+                          ),
+                        ),
+                      ),
+                      Text(
+                        time,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyNotificationsState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.03),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.notifications_off_rounded,
+              size: 80,
+              color: Colors.grey.shade200,
+            ),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            "No Notifications Yet",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF1D3E72),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "New requests from users will appear here.",
+            style: TextStyle(
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatNotifTime(Timestamp? timestamp) {
+    if (timestamp == null) return "Just now";
+    final now = DateTime.now();
+    final date = timestamp.toDate();
+    final diff = now.difference(date);
+
+    if (diff.inMinutes < 1) return "Just now";
+    if (diff.inMinutes < 60) return "${diff.inMinutes}m ago";
+    if (diff.inHours < 24) return "${diff.inHours}h ago";
+    if (diff.inDays < 7) return "${diff.inDays}d ago";
+    return DateFormat('MMM d').format(date);
   }
 
   Widget _buildStatusOption(
